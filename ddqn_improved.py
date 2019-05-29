@@ -24,6 +24,7 @@ class DQNAgent:
         self.epsilon_min = 0.01
         self.epsilon_decay = 0.99
         self.learning_rate = 0.001
+       # self.learning_rate = learning_rate
         self.model = self._build_model()
         self.target_model = self._build_model()
         self.update_target_model()
@@ -98,11 +99,6 @@ class DQNAgent:
     def save(self, name):
         self.model.save_weights(name)
 
-    #def plot(e, score):
-     #   fig, ax = plt.figure()
-
-    #def fun(self, e, time):
-
 
 if __name__ == "__main__":
     # agent => 相当于大脑  agent接收当前的observation
@@ -113,6 +109,7 @@ if __name__ == "__main__":
     state_size = env.observation_space.shape[0]
     # action_size <=> 2  class 'int'
     action_size = env.action_space.n
+   # learning_rate = 0.001
     agent = DQNAgent(state_size, action_size)
     # agent.load("./save/cartpole-ddqn.h5")
     done = False
@@ -121,9 +118,8 @@ if __name__ == "__main__":
     plt.close()
     fig = plt.figure()
     ax = fig.add_subplot(1, 1, 1)
-    #ax.axis("equal")
     plt.grid(True)
-    plt.ion()   #打开交互模式
+    plt.ion()
 
     for e in range(EPISODES):
         # 初始化环境
@@ -139,15 +135,20 @@ if __name__ == "__main__":
             agent.remember(state, action, reward, next_state, done)
             state = next_state
             if done:
+                if(time == 499):
+                    reward = 10
+                #learning_rate = tf.train.linear_cosine_decay(learning_rate, e, EPISODES)
                 agent.update_target_model()
-                print("episode: {}/{}, score: {}, e: {:.2}"
+                print("episode: {}/{}, score: {}, e: {:.2} "
                       .format(e, EPISODES, time, agent.epsilon))
 
-                #散点图
                 ax.scatter(e, time, c = 'b', marker='x')
-                plt.pause(0.01)
+                plt.pause(0.001)
                 break
             if len(agent.memory) > batch_size:
                 agent.replay(batch_size)
+
         # if e % 10 == 0:
         #     agent.save("./save/cartpole-ddqn.h5")
+        if e % 10 == 0:
+            plt.savefig("ddqn_improved.png")
